@@ -5,9 +5,12 @@ $base_dir = resolve-path .\
 $source_dir = "$base_dir\src"
 $unitTestProjectPath = "$source_dir\UnitTests"
 $integrationTestProjectPath = "$source_dir\IntegrationTests"
+$acceptanceTestProjectPath = "$source_dir\AcceptanceTests"
 $uiProjectPath = "$source_dir\UI"
+$jobProjectPath = "$source_dir\Job"
 $databaseProjectPath = "$source_dir\Database"
 $projectConfig = $env:BuildConfiguration
+$framework = "netcoreapp2.2"
 $version = $env:Version
 $verbosity = "m"
 
@@ -54,7 +57,10 @@ Function UnitTests{
 
 	try {
 		exec {
-			& dotnet test -nologo -v $verbosity --logger:trx --results-directory $test_dir --no-build --no-restore --configuration $projectConfig
+			& dotnet test -nologo -v $verbosity --logger:trx `
+			--results-directory $test_dir --no-build `
+			--no-restore --configuration $projectConfig `
+			--collect:"Code Coverage" 
 		}
 	}
 	finally {
@@ -67,7 +73,10 @@ Function IntegrationTest{
 
 	try {
 		exec {
-			& dotnet test -nologo -v $verbosity --logger:trx --results-directory $test_dir --no-build --no-restore --configuration $projectConfig
+			& dotnet test -nologo -v $verbosity --logger:trx `
+			--results-directory $test_dir --no-build `
+			--no-restore --configuration $projectConfig `
+			--collect:"Code Coverage" 
 		}
 	}
 	finally {
@@ -97,14 +106,29 @@ Function MigrateDatabaseRemote{
 
 Function Pack{
 	Write-Output "Packaging nuget packages"
+    exec{
+        & dotnet publish $uiProjectPath -nologo --no-restore --no-build -v $verbosity --configuration $projectConfig
+    }
 	exec{
-		& .\tools\octopack\Octo.exe pack --id "$projectName.UI" --version $version --basePath $uiProjectPath --outFolder $build_dir
+		& .\tools\octopack\Octo.exe pack --id "$projectName.UI" --version $version --basePath $uiProjectPath\bin\$projectConfig\$framework\publish --outFolder $build_dir --overwrite
 	}
-	exec{
-		& .\tools\octopack\Octo.exe pack --id "$projectName.Database" --version $version --basePath $databaseProjectPath --outFolder $build_dir
+
+    exec{
+		& .\tools\octopack\Octo.exe pack --id "$projectName.Database" --version $version --basePath $databaseProjectPath --outFolder $build_dir --overwrite
 	}
+
+    exec{
+        & dotnet publish $jobProjectPath -nologo --no-restore --no-build -v $verbosity --configuration $projectConfig
+    }
 	exec{
-		& .\tools\octopack\Octo.exe pack --id "$projectName.IntegrationTests" --version $version --basePath $integrationTestProjectPath --outFolder $build_dir
+		& .\tools\octopack\Octo.exe pack --id "$projectName.Job" --version $version --basePath $jobProjectPath\bin\$projectConfig\$framework\publish --outFolder $build_dir --overwrite
+	}
+
+    exec{
+        & dotnet publish $acceptanceTestProjectPath -nologo --no-restore --no-build -v $verbosity --configuration $projectConfig
+    }
+	exec{
+		& .\tools\octopack\Octo.exe pack --id "$projectName.AcceptanceTests" --version $version --basePath $acceptanceTestProjectPath\bin\$projectConfig\$framework\publish --outFolder $build_dir --overwrite
 	}
 }
 

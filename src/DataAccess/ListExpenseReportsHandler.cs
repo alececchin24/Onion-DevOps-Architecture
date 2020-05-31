@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using ClearMeasure.OnionDevOpsArchitecture.Core;
-using ClearMeasure.OnionDevOpsArchitecture.Core.Features.BrowseExpenseReports;
+using ClearMeasure.OnionDevOpsArchitecture.Core.Features.ExpenseReports;
 using ClearMeasure.OnionDevOpsArchitecture.Core.Model;
 using ClearMeasure.OnionDevOpsArchitecture.DataAccess.Mappings;
 
