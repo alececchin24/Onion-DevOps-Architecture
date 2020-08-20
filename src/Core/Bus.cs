@@ -5,6 +5,7 @@ namespace ClearMeasure.OnionDevOpsArchitecture.Core
 {
     //Code adapted from MvcContrib (https://archive.codeplex.com/?p=mvccontrib)
     //Some code adapted from Mediatr (https://github.com/jbogard/MediatR)
+    //ciao
     public delegate object SingleInstanceFactory(Type serviceType);
 
     public partial class Bus
